@@ -1,0 +1,52 @@
+# install with:
+# ./ci/dev-init.sh
+# pip install pre-commit
+# pre-commit install
+#
+# https://pre-commit.com/
+---
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.1.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: detect-aws-credentials
+        args: ["--allow-missing-credentials"]
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        exclude: '\.bat$'
+      - id: trailing-whitespace
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 4.0.1
+    hooks:
+      - id: flake8
+
+  - repo: https://github.com/pryorda/dockerfilelint-precommit-hooks
+    rev: v0.1.0
+    hooks:
+      - id: dockerfilelint
+        stages: [commit]
+
+  - repo: https://github.com/PFigs/pre-commit-shell
+    rev: v1.0.7
+    hooks:
+      - id: shell-lint
+
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.1.13
+    hooks:
+      - id: remove-tabs
+        args: [--whitespaces-count=4] # defaults to: 4
+
+  # Python
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
