@@ -1,0 +1,52 @@
+version: '3.7'
+services:
+    zookeeper:
+        image: 'bitnami/zookeeper:3'
+        restart: 'no'
+        networks:
+            - turl-services-network
+        environment:
+            - ALLOW_ANONYMOUS_LOGIN=yes
+
+    kafka-node:
+        image: 'bitnami/kafka:2'
+        restart: 'no'
+        networks:
+            - turl-services-network
+        environment:
+            - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+            - ALLOW_PLAINTEXT_LISTENER=yes
+            - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+        depends_on:
+            -  zookeeper
+
+    database:
+        image: turl_postgres
+        restart: 'no'
+        environment:
+            - POSTGRES_PASSWORD=turl
+        build:
+            context: ./services/postgres
+        ports:
+            - 5432:5432
+
+    adminer:
+        image: adminer
+        restart: 'no'
+        ports:
+            - 8080:8080
+
+    akhq:
+        container_name: akhq
+        image:  tchiotludo/akhq
+        restart: 'no'
+        networks:
+            - turl-services-network
+        volumes:
+            - ./services/akhq/application.yaml:/app/application.yml
+        ports:
+            - 8888:8080
+
+networks:
+  turl-services-network:
+    name: turl-services-network

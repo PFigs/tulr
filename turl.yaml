@@ -1,0 +1,33 @@
+---
+version: 1.0
+logger:
+    level: debug
+
+turl:
+    hosts:
+        http://www.google.com:
+            search_pattern: google.com
+            rate: 2
+
+        http://python.org:
+            rate: 2
+
+kafka:
+    producer:
+        bootstrap.servers: &kafka_server "kafka-node:9092"
+
+    consumer:
+        bootstrap.servers: *kafka_server
+        group.id: "turlx"
+        auto.offset.reset: "earliest"
+
+    topics:
+        producer: &producer_topic
+            - turl
+        consumer: *producer_topic
+
+pg:
+    dbname: turl
+    user: turl
+    password: turl
+    host: pg

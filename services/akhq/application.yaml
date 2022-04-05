@@ -1,0 +1,17 @@
+# requires keystore and truststore as instructed here in the docs
+# https://akhq.io/docs/configuration/brokers.html#example-for-confluent-cloud
+akhq:
+  connections:
+    turl:
+      properties:
+        bootstrap.servers: "kafka-node:9092"
+    aiven:
+      properties:
+        bootstrap.servers: "kafka-9a17a55-pedro-20ea.aivencloud.com:10561"
+        security.protocol: SSL
+        ssl.truststore.location: "/secrets/avnadmin.truststore.jks"
+        ssl.truststore.password: "aiventurl"
+        ssl.keystore.type: "PKCS12"
+        ssl.keystore.location: "/secrets/avnadmin.keystore.p12"
+        ssl.keystore.password: "turl"
+        ssl.key.password: "turl"

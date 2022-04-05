@@ -1,0 +1,31 @@
+version: "3.7"
+services:
+    turl-http:
+        image: turl
+        networks:
+            - turl-services-network
+        build:
+            dockerfile: Dockerfile
+            context: .
+        restart: "no"
+        volumes:
+            -  ./turl.yaml:/config/turl.yaml
+            - ./secrets:/secrets
+        command: turl --configuration /config/turl.yaml
+
+    turl-pg-sink:
+        image: turl
+        networks:
+            - turl-services-network
+        build:
+            dockerfile: Dockerfile
+            context: .
+        restart: "no"
+        volumes:
+            -  ./turl.yaml:/config/turl.yaml
+            - ./secrets:/secrets
+        command: turl_pg_sink --configuration /config/turl.yaml
+
+networks:
+    turl-services-network:
+        name: turl-services-network

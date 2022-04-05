@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+    turl:
+        image: turl
+        networks:
+            - turl-services-network
+        build:
+            dockerfile: Dockerfile
+            context: .
+        restart: "no"
+        volumes:
+            - ./secrets:/secrets
+
+networks:
+    turl-services-network:
+        name: turl-services-network

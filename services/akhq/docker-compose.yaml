@@ -1,0 +1,19 @@
+version: "3.7"
+services:
+
+    akhq:
+        container_name: akhq
+        image: tchiotludo/akhq
+        restart: 'no'
+        networks:
+            - turl-services-network
+        volumes:
+            - ./application.yaml:/app/application.yml
+            - ../../secrets/:/secrets
+        ports:
+            - 8888:8080
+
+networks:
+    turl-services-network:
+        name: turl-services-network
+        external: true

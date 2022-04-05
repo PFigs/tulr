@@ -1,0 +1,27 @@
+version: "3.7"
+services:
+
+    pg:
+        image: turl_postgres
+        restart: 'no'
+        networks:
+            - turl-services-network
+        environment:
+            - POSTGRES_PASSWORD=turl
+        build:
+            context: .
+
+    adminer:
+        image: adminer
+        networks:
+            - turl-services-network
+        restart: 'no'
+        ports:
+            - 8080:8080
+        depends_on:
+            -   pg
+
+networks:
+    turl-services-network:
+        name: turl-services-network
+        external: true
