@@ -1,0 +1,42 @@
+---
+version: 1.0
+logger:
+    level: debug
+
+turl:
+    hosts:
+        http://www.google.com:
+            search_pattern: google.com
+            rate: 2
+
+        http://python.org:
+        rate: 2
+
+kafka:
+    producer:
+        bootstrap.servers: &kafka_server "kafka-9a17a55-pedro-20ea.aivencloud.com:10561"
+        security.protocol: "SSL"
+        ssl.certificate.location: "/secrets/service.cert"
+        ssl.key.location: "/secrets/service.key"
+        ssl.ca.location: "/secrets/ca.pem"
+
+    consumer:
+        bootstrap.servers: *kafka_server
+        group.id: "turl"
+        auto.offset.reset: "earliest"
+        security.protocol: "SSL"
+        ssl.certificate.location: "/secrets/service.cert"
+        ssl.key.location: "/secrets/service.key"
+        ssl.ca.location: "/secrets/ca.pem"
+
+    topics:
+        producer: &producer_topic
+            - turl
+        consumer: *producer_topic
+
+pg:
+    dbname: turl
+    user: avnadmin
+    password: "*****"
+    host: pg-ac48f50-pedro-20ea.aivencloud.com
+    port: 10559
