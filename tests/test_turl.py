@@ -1,4 +1,5 @@
 import pathlib
+import queue
 import threading
 import time
 import unittest
@@ -16,7 +17,7 @@ class TestTurl(unittest.TestCase):
         self.turl_obj = Turl(config_filepath=config_filepath)
 
     def consume_queue(
-        self, responses_queue, signal_exit, expect_results, max_timeout=10
+        self, responses_queue, signal_exit, expect_results, max_timeout=60
     ):
 
         timeout = 0
@@ -27,20 +28,23 @@ class TestTurl(unittest.TestCase):
 
         while timeout < max_timeout:
             all_done = True
-            msg = responses_queue.get()
-            observed_host = msg.url
-            self.assertTrue(observed_host in hosts)
-            observed_results[observed_host] += 1
-            print(observed_host, observed_results[observed_host])
+
+            while True:
+                try:
+                    msg = responses_queue.get(timeout=0)
+                    print(f"received: {msg}")
+                    observed_host = msg.url
+                    self.assertTrue(observed_host in hosts)
+                    observed_results[observed_host] += 1
+                except queue.Empty:
+                    break
+
             for host, observed_count in observed_results.items():
-                print(
-                    f"{observed_host} seen:{observed_results[observed_host]} expected: {expect_results[host]}"
-                )
+                print(f"{host} seen:{observed_count} expected: {expect_results[host]}")
                 if observed_count >= expect_results[host]:
                     all_done &= True
                 else:
                     all_done &= False
-            print(all_done)
             if all_done:
                 break
 

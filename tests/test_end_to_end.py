@@ -1,20 +1,7 @@
-import pathlib
 import unittest
-
-import yaml
-
-from turl import Turl, PgSink
 
 
 class TestEndToEnd(unittest.TestCase):
-    def setUp(self) -> None:
-        config_filepath = "./turl.yaml"
-        with pathlib.Path(config_filepath) as filepath:
-            self.config_file = yaml.load(filepath.read_text(), Loader=yaml.SafeLoader)
-
-        self.turl_obj = Turl(config_filepath=config_filepath)
-        self.pg_sink = PgSink(config_filepath=config_filepath)
-
     def monitor(self):
         # Monitor messages in topic and exists when consumption has happened
         pass

@@ -10,6 +10,7 @@ services:
         restart: "no"
         volumes:
             - ./secrets:/secrets
+        command: ["python3", "-m", "unittest"]
 
 networks:
     turl-services-network:
