@@ -51,7 +51,7 @@ class Turl(AioBase):
                         await self.publish_url_checks(
                             topic=topic, message=turl_record.to_json()
                         )
-                    except confluent_kafka.KafkaException as error:
+                    except confluent_kafka.error.ProduceError as error:
                         self.logger.error(error)
                         self.signal_exit.set()
                         break
@@ -65,15 +65,30 @@ class Turl(AioBase):
 
     async def publish_url_checks(self, topic, message):
         self.logger.debug(f"publishing: {message} to {topic}")
-        await self.producer.produce(topic=topic, value=message)
+        try:
+            await self.producer.produce(topic=topic, value=message)
+        except confluent_kafka.KafkaException:
+            self.signal_exit.set()
+
+    def on_error_cb(self, error: confluent_kafka.error.KafkaError):
+        self.logger.error(error)
+        self.signal_exit.set()
+
+    def on_delivery_cb(self, error: confluent_kafka.error.KafkaError):
+        self.logger.error(error)
+        self.signal_exit.set()
 
     def on_run(self):
 
         tasks = list()
         loop = asyncio.get_running_loop()
 
+        self.config["kafka"]["producer"]["error_cb"] = self.on_error_cb
+
         try:
-            self.producer = KafkaProducer(configs=self.config["kafka"], loop=loop)
+            self.producer = KafkaProducer(
+                configs=self.config["kafka"], loop=loop, logger=self.logger
+            )
         except confluent_kafka.KafkaException as error:
             self.logger.error(error)
             return

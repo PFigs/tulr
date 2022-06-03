@@ -12,14 +12,19 @@ class KafkaProducer:
     https://github.com/confluentinc/confluent-kafka-python/blob/master/examples/asyncio_example.py
     """
 
-    def __init__(self, configs, loop=None):
+    def __init__(self, configs, loop=None, logger=None):
         self._loop = loop or asyncio.get_running_loop()
         self.config = configs
-        self._producer = confluent_kafka.Producer(**self.config["producer"])
+        self._producer = confluent_kafka.Producer(
+            **self.config["producer"], logger=logger
+        )
         self._cancelled = False
         self._poll_thread = threading.Thread(target=self._poll_loop)
         self._poll_thread.start()
         self.topics = self.config["topics"]["producer"]
+
+    def error_cb(self, error):
+        print(error)
 
     def _poll_loop(self):
         while not self._cancelled:
