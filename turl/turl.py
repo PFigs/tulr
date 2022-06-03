@@ -6,6 +6,7 @@ import threading
 import time
 
 import aiohttp
+import confluent_kafka
 
 from .aiobase import AioBase
 from .configuration import Configuration
@@ -21,7 +22,9 @@ class Turl(AioBase):
         self.signal_exit = threading.Event()
         self.producer = None
 
-    async def check_url(self, url: str, search_pattern: str = "", rate=60):
+    async def check_url(
+        self, url: str, search_pattern: str = "", rate=60, topic="turl"
+    ):
         has_content = False
         async with aiohttp.ClientSession() as session:
             while not self.signal_exit.is_set():
@@ -43,7 +46,15 @@ class Turl(AioBase):
                         content_search_success=has_content,
                         last_check=ts.isoformat(),
                     )
-                    self.responses_queue.put(turl_record)
+
+                    try:
+                        await self.publish_url_checks(
+                            topic=topic, message=turl_record.to_json()
+                        )
+                    except confluent_kafka.KafkaException as error:
+                        self.logger.error(error)
+                        self.signal_exit.set()
+                        break
 
                     toc = time.monotonic()
                     sleep_for = rate - (toc - tic)
@@ -52,39 +63,27 @@ class Turl(AioBase):
         self.ensure_exit()
         self.logger.info(f"closed tracking session for {url}")
 
-    async def publish_url_checks(self):
-        loop = asyncio.get_running_loop()
-        self.producer = KafkaProducer(configs=self.config["kafka"], loop=loop)
-        while True:
-            items_to_process = self.responses_queue.qsize()
-            if items_to_process == 0 and self.signal_exit.is_set():
-                break
-            self.logger.debug(
-                f"waiting for event (queue size={self.responses_queue.qsize()})"
-            )
-            try:
-                response = self.responses_queue.get(block=False)
-                self.logger.debug(f"publishing: {response}")
-                for topic in self.producer.topics:
-                    await self.producer.produce(topic=topic, value=response.to_json())
-
-            except queue.Empty:
-                pass
-            await asyncio.sleep(1)
-
-        self.ensure_exit()
-        self.logger.info("kafka publisher has terminated")
+    async def publish_url_checks(self, topic, message):
+        self.logger.debug(f"publishing: {message} to {topic}")
+        await self.producer.produce(topic=topic, value=message)
 
     def on_run(self):
 
         tasks = list()
+        loop = asyncio.get_running_loop()
+
+        try:
+            self.producer = KafkaProducer(configs=self.config["kafka"], loop=loop)
+        except confluent_kafka.KafkaException as error:
+            self.logger.error(error)
+            return
+
         for host, host_conf in self.config["turl"]["hosts"].items():
             if host_conf is None:
                 host_conf = dict()
             task = asyncio.create_task(self.check_url(url=host, **host_conf))
             tasks.append(task)
 
-        tasks.append(asyncio.create_task(self.publish_url_checks()))
         return tasks
 
     def on_exit(self):

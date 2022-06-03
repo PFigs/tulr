@@ -46,6 +46,7 @@ class Configuration:
                     {
                         Optional("rate", default=1): Or(int, float),
                         Optional("search_pattern", default=None): str,
+                        Optional("topic", default="turl"): str,
                     },
                 )
             }

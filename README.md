@@ -1,6 +1,6 @@
 # tulr
-turl - track url - is a simple page monitor that communicates events to kafka
 
+turl - track url - is a simple page monitor that communicates events to kafka
 
 ## What is the goal of turl?
 
@@ -108,29 +108,6 @@ Here's an example on how to launch and build the postgres service
 
 As a shortcut you can launch all services and turl's tracker and sink by executing the [launch.sh file](./launch.sh).
 
-
-## Future work
-
-The idea of Turl is something I came up when reading the assignment for the first time. I wanted to show with it that I
-often like  to think how can I make my software easy and ready to use by others. I really enjoy having the
-possibility to clone and  run the infrastructure end to end.
-
-I also wanted to take this opportunity to learn something new and that was the main reason I took in use asyncio. It
-is something I have not used a lot in Python and wanted to get a feel of where it stands these days. Similarly,
-some choices with pg were also done to recall some concepts, such as triggers despite not being the most ideal
-solution for the problem (eg, wasteful url replicated all the time).
-
-As it was requested to not spend too much time on build scripts and whatnot I tried not to put too much work on that, but
-in the repo you can find compositions to launch all the infra pieces on the developers' machine with minimal effort. These
-are also key for ensuring good tests of the framework.
-
-I have added some basic ci/cd checks that run the turl tests and pre-commit actions against all files. Much more could
-be done towards code coverage, quality analysis, among others.
-
-The end to end test should have a kafka consumer which tracks the messages that the sink should be writting. These messages
-should be asserted from the db. At the moment I did not have the async loop exposed to the consumer, thus making it a
-bit more difficult to instanciate and run the turl's consumer from the tests. Regardless of that, improving the test
-case with that functionality would make the test much more reliable.
 
 ## Powered by:
 

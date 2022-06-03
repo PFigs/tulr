@@ -8,9 +8,11 @@ turl:
         http://www.google.com:
             search_pattern: google.com
             rate: 2
+            topic: turl
 
         http://python.org:
             rate: 2
+            topic: turl
 
 kafka:
     producer:
