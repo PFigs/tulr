@@ -23,9 +23,6 @@ class KafkaProducer:
         self._poll_thread.start()
         self.topics = self.config["topics"]["producer"]
 
-    def error_cb(self, error):
-        print(error)
-
     def _poll_loop(self):
         while not self._cancelled:
             self._producer.poll(0.1)

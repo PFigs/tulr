@@ -68,15 +68,18 @@ class Turl(AioBase):
         try:
             await self.producer.produce(topic=topic, value=message)
         except confluent_kafka.KafkaException:
-            self.signal_exit.set()
+            if not self.signal_exit.is_set():
+                self.signal_exit.set()
 
     def on_error_cb(self, error: confluent_kafka.error.KafkaError):
         self.logger.error(error)
-        self.signal_exit.set()
+        if not self.signal_exit.is_set():
+            self.signal_exit.set()
 
     def on_delivery_cb(self, error: confluent_kafka.error.KafkaError):
         self.logger.error(error)
-        self.signal_exit.set()
+        if not self.signal_exit.is_set():
+            self.signal_exit.set()
 
     def on_run(self):
 
